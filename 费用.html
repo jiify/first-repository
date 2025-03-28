@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 15px;
+        }
+        .chart-box {
+            width: 100%;
+            height: 65vh;
+            min-height: 300px;
+            padding: 5px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .balance-box {
+            padding: 15px;
+            margin: 10px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border: 1px solid #c8e6c9;
+        }
+        @media (min-width: 768px) {
+            .container { flex-direction: row; }
+            .chart-box { height: 70vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="pieChart" class="chart-box"></div>
+        <div id="barChart" class="chart-box"></div>
+    </div>
+    
+    <div class="balance-box">
+        <h3 style="color:#2e7d32;margin-bottom:10px;">结余分配</h3>
+        <p>总经费：650元 ➜ 实际支出：593元</p >
+        <p style="color: #2e7d32; font-weight: bold; margin: 8px 0;">
+            结余：57元 (人均退还：4.38元)
+        </p >
+        <p style="font-size:0.9em;color:#666;">参与人数：13人</p >
+    </div>
+
+    <script>
+        // 支出明细数据
+        const expenseData = [
+            { name: '鲜虾热狗等', value: 148 },
+            { name: '其他消费', value: 163 },
+            { name: '配料饮料牛肉等', value: 72 },
+            { name: '鸡翅鸡爪中翅', value: 76 },
+            { name: '圣女果水果类', value: 53 },
+            { name: '香蕉', value: 25 },
+            { name: '面条烧烤粉', value: 18 },
+            { name: '茄子玉米', value: 10 },
+            { name: '菠萝魔芋', value: 16 } // 合并8+8
+        ];
+
+        // 移动端适配检测
+        const isMobile = window.innerWidth < 768;
+
+        // 饼图配置
+        const pieOption = {
+            title: {
+                text: '支出项目分布',
+                left: 'center',
+                textStyle: { fontSize: isMobile ? 16 : 18 }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}: {c}元 ({d}%)'
+            },
+            legend: {
+                show: !isMobile,
+                orient: 'horizontal',
+                bottom: 10,
+                textStyle: { fontSize: 12 }
+            },
+            series: [{
+                type: 'pie',
+                radius: isMobile ? '60%' : ['45%', '70%'],
+                avoidLabelOverlap: true,
+                label: {
+                    show: true,
+                    formatter: isMobile ? '{b|{b}}\n{c}元' : '{b|{b}}\n{c}元 ({d}%)',
+                    position: 'outer',
+                    alignTo: 'edge',
+                    margin: 8,
+                    rich: { b: { fontSize: isMobile ? 12 : 14 } }
+                },
+                itemStyle: {
+                    borderRadius: 6,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
+                data: expenseData
+            }]
+        };
+
+        // 柱状图配置
+        const barOption = {
+            title: {
+                text: '经费使用对比',
+                left: 'center',
+                textStyle: { fontSize: isMobile ? 16 : 18 }
+            },
+            xAxis: {
+                type: 'category',
+                data: ['总经费', '实际支出', '结余'],
+                axisLabel: {
+                    rotate: isMobile ? 45 : 0,
+                    interval: 0,
+                    fontSize: 14
+                }
+            },
+            yAxis: { 
+                type: 'value',
+                axisLabel: { formatter: '{value} 元' }
+            },
+            series: [{
+                data: [650, 593, 57],
+                type: 'bar',
+                itemStyle: {
+                    color: params => params.dataIndex === 2 ? '#2e7d32' : '#4CAF50'
+                },
+                label: {
+                    show: true,
+                    position: 'top',
+                    formatter: '{c}元',
+                    fontSize: isMobile ? 12 : 14
+                }
+            }]
+        };
+
+        // 初始化图表
+        const initCharts = () => {
+            const pieChart = echarts.init(document.getElementById('pieChart'));
+            const barChart = echarts.init(document.getElementById('barChart'));
+            
+            pieChart.setOption(pieOption);
+            barChart.setOption(barOption);
+
+            // 响应式处理
+            window.addEventListener('resize', () => {
+                pieChart.resize();
+                barChart.resize();
+            });
+        };
+
+        initCharts();
+    </script>
+</body>
+</html>
